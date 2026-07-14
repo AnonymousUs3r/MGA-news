@@ -1,0 +1,36 @@
+name: MGA News RSS
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 feedgen
+
+      - name: Run scraper
+        run: python mga_news_rss.py
+
+      - name: Commit RSS feed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add mga_news.xml
+          git commit -m "Updated MGA News RSS feed" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push
