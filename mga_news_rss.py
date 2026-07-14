@@ -18,7 +18,6 @@ def fetch_page():
         sys.exit(1)
 
 def parse_items(soup):
-    # MGA uses <article> blocks for news items
     items = soup.select("article")
     if not items:
         print("⚠️ No news items found on MGA page.")
@@ -47,8 +46,8 @@ def parse_feed(items):
         href = link_tag["href"]
         full_link = href if href.startswith("http") else "https://www.mga.org.mt" + href
 
-        # REAL publication date (left purple block)
-        date_tag = item.select_one("div.bg-purple p")
+        # REAL publication date (purple block)
+        date_tag = item.select_one("div.bg-purple time")
 
         if not date_tag:
             print(f"⚠️ No date found for: {title}")
