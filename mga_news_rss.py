@@ -1,11 +1,11 @@
+import requests
 import sys
 import hashlib
-import requests
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 
-URL = "https://www.mga.org.mt/who-we-are/news/"
+URL = "https://www.mga.org.mt/who-we-are/news"
 
 def fetch_page():
     print("🌐 Fetching MGA News page...")
@@ -34,11 +34,17 @@ def parse_feed(items):
     fg.description("Latest news from the Malta Gaming Authority – Who We Are section")
     fg.language("en")
 
+    # ⭐ REQUIRED FOR FEEDER — Atom self-link
+    fg.atom_link(
+        href="https://anonymousus3r.github.io/MGA-news/mga_news.xml",
+        rel="self",
+        type="application/rss+xml"
+    )
+
     for item in items:
-        # Title + link (right-hand block)
+        # Title + link
         link_tag = item.select_one("a")
         title_tag = item.select_one("h2, h3, h4")
-
         if not link_tag or not title_tag:
             continue
 
@@ -46,9 +52,8 @@ def parse_feed(items):
         href = link_tag["href"]
         full_link = href if href.startswith("http") else "https://www.mga.org.mt" + href
 
-        # REAL publication date (purple block)
+        # Publication date
         date_tag = item.select_one("div.bg-purple time")
-
         if not date_tag:
             print(f"⚠️ No date found for: {title}")
             continue
