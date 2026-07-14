@@ -36,22 +36,32 @@ def parse_feed(items):
     fg.language("en")
 
     for item in items:
+        # Title + link (right-hand block)
         link_tag = item.select_one("a")
         title_tag = item.select_one("h2, h3, h4")
-        date_tag = item.select_one("time")
 
-        if not link_tag or not title_tag or not date_tag:
+        if not link_tag or not title_tag:
             continue
 
         title = title_tag.get_text(strip=True)
         href = link_tag["href"]
         full_link = href if href.startswith("http") else "https://www.mga.org.mt" + href
+
+        # REAL publication date (left purple block)
+        date_tag = item.select_one("div.bg-purple p")
+
+        if not date_tag:
+            print(f"⚠️ No date found for: {title}")
+            continue
+
         date_text = date_tag.get_text(strip=True)
 
         try:
-            dt = datetime.strptime(date_text, "%B %d, %Y")
+            # MGA format: "7 July 2026"
+            dt = datetime.strptime(date_text, "%d %B %Y")
             pub_date = datetime(dt.year, dt.month, dt.day, 12, 0, 0, tzinfo=timezone.utc)
-        except Exception:
+        except Exception as e:
+            print(f"⚠️ Date parse issue for {title}: {e}")
             pub_date = datetime.now(timezone.utc)
 
         guid = hashlib.md5((title + full_link).encode("utf-8")).hexdigest()
