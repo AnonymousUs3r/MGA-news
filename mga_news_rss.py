@@ -35,7 +35,7 @@ def parse_feed(items):
     fg.language("en")
 
     # ⭐ REQUIRED FOR FEEDER — Atom self-link
-    fg.atom_link(
+    fg.atom_file(
         href="https://anonymousus3r.github.io/MGA-news/mga_news.xml",
         rel="self",
         type="application/rss+xml"
