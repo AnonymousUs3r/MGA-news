@@ -34,15 +34,13 @@ def parse_feed(items):
     fg.description("Latest news from the Malta Gaming Authority – Who We Are section")
     fg.language("en")
 
-    # ⭐ REQUIRED FOR FEEDER — Atom self-link
-    fg.atom_file(
+    # ⭐ REQUIRED FOR FEEDER — Atom self-link (feedgen 0.9.0 syntax)
+    fg.link(
         href="https://anonymousus3r.github.io/MGA-news/mga_news.xml",
-        rel="self",
-        type="application/rss+xml"
+        rel="self"
     )
 
     for item in items:
-        # Title + link
         link_tag = item.select_one("a")
         title_tag = item.select_one("h2, h3, h4")
         if not link_tag or not title_tag:
@@ -52,7 +50,6 @@ def parse_feed(items):
         href = link_tag["href"]
         full_link = href if href.startswith("http") else "https://www.mga.org.mt" + href
 
-        # Publication date
         date_tag = item.select_one("div.bg-purple time")
         if not date_tag:
             print(f"⚠️ No date found for: {title}")
@@ -61,7 +58,6 @@ def parse_feed(items):
         date_text = date_tag.get_text(strip=True)
 
         try:
-            # MGA format: "7 July 2026"
             dt = datetime.strptime(date_text, "%d %B %Y")
             pub_date = datetime(dt.year, dt.month, dt.day, 12, 0, 0, tzinfo=timezone.utc)
         except Exception as e:
